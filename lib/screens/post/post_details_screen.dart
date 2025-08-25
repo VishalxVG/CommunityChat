@@ -1,18 +1,42 @@
+// Change to a ConsumerStatefulWidget to handle the TextEditingController
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:fullstack_app/providers/post_providers.dart';
 import 'package:fullstack_app/widgets/comment_title.dart';
 import 'package:fullstack_app/widgets/post_card.dart';
 
-class PostDetailsScreen extends ConsumerWidget {
+class PostDetailsScreen extends ConsumerStatefulWidget {
   final String postId;
   const PostDetailsScreen({super.key, required this.postId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final postAsync = ref.watch(postDetailsProvider(postId));
-    final commentsAsync = ref.watch(commentsProvider(postId));
+  ConsumerState<PostDetailsScreen> createState() => _PostDetailsScreenState();
+}
+
+class _PostDetailsScreenState extends ConsumerState<PostDetailsScreen> {
+  final _commentController = TextEditingController();
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  void _postComment() {
+    if (_commentController.text.trim().isEmpty) return;
+
+    ref
+        .read(commentsProvider(widget.postId).notifier)
+        .addComment(text: _commentController.text.trim());
+
+    _commentController.clear();
+    FocusScope.of(context).unfocus(); // Dismiss keyboard
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final postAsync = ref.watch(postDetailsProvider(widget.postId));
+    final commentsAsync = ref.watch(commentsProvider(widget.postId));
 
     return Scaffold(
       appBar: AppBar(),
@@ -23,11 +47,12 @@ class PostDetailsScreen extends ConsumerWidget {
               data: (post) => PostCard(
                 post: post,
                 onTap: () {},
-                onUpvote: () {
-                  ref.read(postDetailsProvider(postId).notifier).upvote();
-                },
-                onDownvote: () =>
-                    ref.read(postDetailsProvider(postId).notifier).downvote(),
+                onUpvote: () => ref
+                    .read(postDetailsProvider(widget.postId).notifier)
+                    .upvote(),
+                onDownvote: () => ref
+                    .read(postDetailsProvider(widget.postId).notifier)
+                    .downvote(),
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, s) => Center(child: Text(e.toString())),
@@ -36,10 +61,15 @@ class PostDetailsScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: TextField(
+                controller: _commentController,
                 decoration: InputDecoration(
                   hintText: 'Add a comment...',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8)),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: _postComment,
+                  ),
                 ),
               ),
             ),

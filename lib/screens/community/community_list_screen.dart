@@ -20,7 +20,9 @@ class CommunityListScreen extends ConsumerWidget {
       ),
       body: communitiesAsync.when(
         data: (communities) => RefreshIndicator(
-          onRefresh: () => ref.refresh(communitiesProvider.future),
+          onRefresh: () async {
+            ref.invalidate(communitiesProvider);
+          },
           child: ListView.builder(
             itemCount: communities.length,
             itemBuilder: (context, index) {

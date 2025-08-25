@@ -1,29 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // Import Riverpod
+import 'package:fullstack_app/providers/post_providers.dart'; // Import providers
 import 'package:fullstack_app/widgets/custom_button.dart';
 import 'package:fullstack_app/widgets/custom_text_filed.dart';
 
-class CreatePostScreen extends StatefulWidget {
+// Change to a ConsumerStatefulWidget
+class CreatePostScreen extends ConsumerStatefulWidget {
   final String communityId;
   const CreatePostScreen({super.key, required this.communityId});
 
   @override
-  State<CreatePostScreen> createState() => _CreatePostScreenState();
+  ConsumerState<CreatePostScreen> createState() => _CreatePostScreenState();
 }
 
-class _CreatePostScreenState extends State<CreatePostScreen> {
+class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   bool _isLoading = false;
 
-  void _createPost() {
-    // TODO: Integrate with provider/backend to create post
+  void _createPost() async {
+    if (_titleController.text.trim().isEmpty) return; // Basic validation
+
     setState(() => _isLoading = true);
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        Navigator.of(context).pop();
-      }
-    });
+
+    // Call the notifier method to create the post
+    await ref.read(postsProvider(widget.communityId).notifier).createPost(
+          title: _titleController.text.trim(),
+          text: _contentController.text.trim().isEmpty
+              ? null
+              : _contentController.text.trim(),
+        );
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+      Navigator.of(context).pop();
+    }
   }
 
   @override
@@ -37,9 +48,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             CustomTextField(controller: _titleController, hintText: 'Title'),
             const SizedBox(height: 16),
             CustomTextField(
-                controller: _contentController,
-                hintText: 'Text (optional)',
-                maxLines: 8),
+              controller: _contentController,
+              hintText: 'Text (optional)',
+              maxLines: 8,
+            ),
             const SizedBox(height: 24),
             CustomButton(
               text: 'Post',

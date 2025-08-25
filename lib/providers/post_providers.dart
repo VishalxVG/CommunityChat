@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fullstack_app/models/comment.dart';
 import 'package:fullstack_app/models/post.dart';
 import 'package:fullstack_app/providers/community_providers.dart';
+import 'package:fullstack_app/repossitories/comment_repository.dart';
 import 'package:fullstack_app/repossitories/post_repository.dart';
 
 final postRepositoryProvider = Provider<IPostRepository>((ref) {
@@ -113,6 +114,66 @@ class PostsNotifier extends FamilyAsyncNotifier<List<Post>, String> {
     ref.invalidate(postDetailsProvider(postId));
     state = await AsyncValue.guard(() => build(communityId));
   }
+
+  Future<void> createPost({
+    required String title,
+    required String? text,
+  }) async {
+    final communityId = arg;
+    final postRepository = ref.read(postRepositoryProvider);
+
+    await postRepository.createPost(
+      communityId: communityId,
+      title: title,
+      text: text,
+    );
+
+    // Invalidate other providers to ensure they show the new post
+    ref.invalidate(homeFeedPostsProvider);
+
+    // Refresh this provider's state to show the new post
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() => build(communityId));
+  }
+}
+
+final commentRepositoryProvider = Provider<ICommentRepository>((ref) {
+  return InMemoryCommentRepository();
+});
+
+// 2. Change commentsProvider to an AsyncNotifierProvider.family
+final commentsProvider =
+    AsyncNotifierProvider.family<CommentsNotifier, List<Comment>, String>(() {
+  return CommentsNotifier();
+});
+
+class CommentsNotifier extends FamilyAsyncNotifier<List<Comment>, String> {
+  @override
+  Future<List<Comment>> build(String postId) async {
+    return ref.watch(commentRepositoryProvider).getCommentsForPost(postId);
+  }
+
+  Future<void> addComment({required String text}) async {
+    final postId = arg;
+    final commentRepository = ref.read(commentRepositoryProvider);
+    final postRepository = ref.read(postRepositoryProvider);
+
+    // Add the comment
+    await commentRepository.addComment(postId: postId, text: text);
+
+    // Increment the post's comment count
+    await postRepository.incrementCommentCount(postId);
+
+    // Invalidate all post providers so they show the new comment count
+    ref.invalidate(postDetailsProvider(postId));
+    ref.invalidate(postsProvider(
+        (await postRepository.getPostDetails(postId)).communityId));
+    ref.invalidate(homeFeedPostsProvider);
+
+    // Refresh this notifier's state to show the new comment in the list
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() => build(postId));
+  }
 }
 
 // final homeFeedPostsProvider = FutureProvider<List<Post>>((ref) async {
@@ -132,8 +193,8 @@ class PostsNotifier extends FamilyAsyncNotifier<List<Post>, String> {
 //   return apiService.getPostDetails(postId);
 // });
 
-final commentsProvider =
-    FutureProvider.family<List<Comment>, String>((ref, postId) async {
-  final apiService = ref.watch(apiServiceProvider);
-  return apiService.getCommentsForPost(postId);
-});
+// final commentsProvider =
+//     FutureProvider.family<List<Comment>, String>((ref, postId) async {
+//   final apiService = ref.watch(apiServiceProvider);
+//   return apiService.getCommentsForPost(postId);
+// });

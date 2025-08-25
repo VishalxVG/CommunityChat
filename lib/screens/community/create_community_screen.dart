@@ -1,28 +1,39 @@
+// lib/screens/community/create_community_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // Import Riverpod
+import 'package:fullstack_app/providers/community_providers.dart'; // Import providers
 import 'package:fullstack_app/widgets/custom_button.dart';
 import 'package:fullstack_app/widgets/custom_text_filed.dart';
 
-class CreateCommunityScreen extends StatefulWidget {
+// Change to a ConsumerStatefulWidget
+class CreateCommunityScreen extends ConsumerStatefulWidget {
   const CreateCommunityScreen({super.key});
 
   @override
-  State<CreateCommunityScreen> createState() => _CreateCommunityScreenState();
+  ConsumerState<CreateCommunityScreen> createState() =>
+      _CreateCommunityScreenState();
 }
 
-class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
+class _CreateCommunityScreenState extends ConsumerState<CreateCommunityScreen> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   bool _isLoading = false;
 
-  void _createCommunity() {
-    // TODO: Integrate with provider/backend to create community
+  void _createCommunity() async {
+    if (_nameController.text.isEmpty) return; // Basic validation
+
     setState(() => _isLoading = true);
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        Navigator.of(context).pop();
-      }
-    });
+
+    // Call the method on the notifier
+    await ref.read(communitiesProvider.notifier).createCommunity(
+          _nameController.text,
+          _descriptionController.text,
+        );
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+      Navigator.of(context).pop();
+    }
   }
 
   @override
