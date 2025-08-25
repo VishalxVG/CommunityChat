@@ -23,7 +23,9 @@ class HomeScreen extends ConsumerWidget {
       ),
       body: postsAsync.when(
         data: (posts) => RefreshIndicator(
-          onRefresh: () => ref.refresh(homeFeedPostsProvider.future),
+          onRefresh: () async {
+            ref.invalidate(homeFeedPostsProvider);
+          },
           child: ListView.builder(
             itemCount: posts.length,
             itemBuilder: (context, index) {
@@ -31,6 +33,10 @@ class HomeScreen extends ConsumerWidget {
               return PostCard(
                 post: post,
                 onTap: () => context.push('/post/${post.id}'),
+                onUpvote: () =>
+                    ref.read(homeFeedPostsProvider.notifier).upvote(post.id),
+                onDownvote: () =>
+                    ref.read(homeFeedPostsProvider.notifier).downvote(post.id),
               );
             },
           ),

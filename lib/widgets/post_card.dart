@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
+
 import 'package:fullstack_app/models/post.dart';
 
 class PostCard extends StatelessWidget {
   final Post post;
   final VoidCallback onTap;
+  final VoidCallback? onUpvote;
+  final VoidCallback? onDownvote;
 
-  const PostCard({super.key, required this.post, required this.onTap});
+  const PostCard(
+      {super.key,
+      required this.post,
+      required this.onTap,
+      this.onUpvote,
+      this.onDownvote});
 
   @override
   Widget build(BuildContext context) {
@@ -61,12 +69,14 @@ class PostCard extends StatelessWidget {
     return Row(
       children: [
         IconButton(
-            icon: const Icon(Icons.arrow_upward_outlined),
-            onPressed: () {/* TODO: Call provider to upvote */}),
+          icon: const Icon(Icons.arrow_upward_outlined),
+          onPressed: onUpvote,
+        ),
         Text(post.upvotes.toString()),
         IconButton(
-            icon: const Icon(Icons.arrow_downward_outlined),
-            onPressed: () {/* TODO: Call provider to downvote */}),
+          icon: const Icon(Icons.arrow_downward_outlined),
+          onPressed: onDownvote,
+        ),
       ],
     );
   }

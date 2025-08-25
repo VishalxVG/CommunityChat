@@ -20,7 +20,15 @@ class PostDetailsScreen extends ConsumerWidget {
         child: Column(
           children: [
             postAsync.when(
-              data: (post) => PostCard(post: post, onTap: () {}),
+              data: (post) => PostCard(
+                post: post,
+                onTap: () {},
+                onUpvote: () {
+                  ref.read(postDetailsProvider(postId).notifier).upvote();
+                },
+                onDownvote: () =>
+                    ref.read(postDetailsProvider(postId).notifier).downvote(),
+              ),
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, s) => Center(child: Text(e.toString())),
             ),

@@ -51,7 +51,15 @@ class CommunityDetailsScreen extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final post = posts[index];
                 return PostCard(
-                    post: post, onTap: () => context.push('/post/${post.id}'));
+                  post: post,
+                  onTap: () => context.push('/post/${post.id}'),
+                  onUpvote: () => ref
+                      .read(postsProvider(communityId).notifier)
+                      .upvote(post.id),
+                  onDownvote: () => ref
+                      .read(postsProvider(communityId).notifier)
+                      .downvote(post.id),
+                );
               },
             ),
             loading: () => const Center(child: CircularProgressIndicator()),
