@@ -149,8 +149,8 @@ final commentsProvider =
 
 class CommentsNotifier extends FamilyAsyncNotifier<List<Comment>, String> {
   @override
-  Future<List<Comment>> build(String postId) async {
-    return ref.watch(commentRepositoryProvider).getCommentsForPost(postId);
+  Future<List<Comment>> build(String arg) async {
+    return ref.watch(commentRepositoryProvider).getCommentsForPost(arg);
   }
 
   Future<void> addComment({required String text}) async {
