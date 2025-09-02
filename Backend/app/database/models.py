@@ -1,9 +1,17 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 
+
 Base = declarative_base()
+
+user_community_association = Table(
+    "user_community",
+    Base.metadata,
+    Column("user_id", Integer, ForeignKey("users.id")),
+    Column("community_id", Integer, ForeignKey("communities.id")),
+)
 
 
 class User(Base):
@@ -13,6 +21,13 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     password_hash = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    communities = relationship(
+        "Community",
+        secondary=user_community_association,
+        back_populates="members",
+    )
+    posts = relationship("Post", back_populates="author")
 
 
 class Community(Base):
@@ -24,6 +39,12 @@ class Community(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     posts = relationship("Post", back_populates="community")
 
+    members = relationship(
+        "User",
+        secondary=user_community_association,
+        back_populates="communities",
+    )
+
 
 class Post(Base):
     __tablename__ = "posts"
@@ -34,8 +55,11 @@ class Post(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     votes = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
+
     community = relationship("Community", back_populates="posts")
     comments = relationship("Comment", back_populates="post")
+
+    author = relationship("User", back_populates="posts")
 
 
 class Comment(Base):
