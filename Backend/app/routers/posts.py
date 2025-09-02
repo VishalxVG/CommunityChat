@@ -1,11 +1,14 @@
 # app/routers/posts.py
 
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app import schemas, auth
+from sqlalchemy.orm import selectinload
+from app import crud, schemas, auth
 from app.database.session import get_db
 from app.database import models
+from ..schemas import Post
 
 router = APIRouter(prefix="/api/communities", tags=["posts"])
 
@@ -49,7 +52,28 @@ async def create_post_for_community(
     )
     db.add(db_post)
     await db.commit()
+    result = await db.execute(
+        select(models.Post)
+        .options(
+            selectinload(models.Post.author),
+            selectinload(models.Post.community),
+            selectinload(models.Post.comments),
+        )
+        .where(models.Post.id == db_post.id)
+    )
+    post_with_relations = result.scalar_one()
 
-    await db.refresh(db_post, attribute_names=["author", "community"])
+    return post_with_relations
 
-    return db_post
+
+public_router = APIRouter(prefix="/api", tags=["posts"])
+
+
+@public_router.get(
+    "/communities/{community_id}/posts", response_model=List[schemas.Post]
+)
+async def read_posts_for_community(
+    community_id: int, db: AsyncSession = Depends(get_db)
+):
+    posts = await crud.get_posts_for_community(db, community_id=community_id)
+    return [Post.model_validate(post) for post in posts]

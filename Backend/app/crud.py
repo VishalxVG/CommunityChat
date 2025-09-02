@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from sqlalchemy import func
+
 
 from . import schemas
 from .database import models
@@ -113,4 +113,18 @@ async def create_community_post(
     db.add(db_post)
     await db.commit()
     await db.refresh(db_post)
-    return db_post
+    return
+
+
+async def get_posts_for_community(db: AsyncSession, community_id: int):
+    result = await db.execute(
+        select(models.Post)
+        .options(
+            selectinload(models.Post.author),
+            selectinload(models.Post.community),
+            selectinload(models.Post.comments),
+        )
+        .filter(models.Post.community_id == community_id)
+        .order_by(models.Post.created_at.desc())
+    )
+    return result.scalars().all()

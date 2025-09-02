@@ -18,8 +18,7 @@ class User(BaseModel):
     email: str
     created_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 
 # -------------------------------
@@ -32,6 +31,29 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+
+# -------------------------------
+# Comment Schemas
+# -------------------------------
+
+
+class CommentBase(BaseModel):
+    content: str
+
+
+class CommentCreate(CommentBase):
+    pass
+
+
+class Comment(CommentBase):
+    id: int
+    post_id: int
+    user_id: int
+    created_at: datetime
+    author: User
+
+    model_config = {"from_attributes": True}
 
 
 # -------------------------------
@@ -52,11 +74,11 @@ class Post(PostBase):
     community_id: int
     created_at: datetime
     votes: int
-    author: User  # Nested User schema
-    community: "CommunitySimple"  # Forward reference
+    author: User
+    community: "CommunitySimple"
+    comments: List[Comment] = []
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 
 # -------------------------------
@@ -75,8 +97,7 @@ class CommunitySimple(BaseModel):
     id: int
     name: str
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 
 class CommunityDetail(CommunityBase):
@@ -85,8 +106,7 @@ class CommunityDetail(CommunityBase):
     posts: List[Post] = []
     member_count: int  # <-- Computed in CRUD
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 
 # -------------------------------

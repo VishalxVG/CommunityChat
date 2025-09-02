@@ -16,6 +16,7 @@ app.include_router(communities.public_router)  # Public community routes
 
 # Post routes
 app.include_router(posts.router, tags=["posts"])
+app.include_router(posts.public_router)
 
 
 @app.get("/", tags=["root"])
