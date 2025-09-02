@@ -77,3 +77,60 @@ async def read_posts_for_community(
 ):
     posts = await crud.get_posts_for_community(db, community_id=community_id)
     return [Post.model_validate(post) for post in posts]
+
+
+post_actions_router = APIRouter(prefix="/api/posts", tags=["posts-actions"])
+
+
+# -------------------------------
+# 1) Create Comment
+# -------------------------------
+@post_actions_router.post(
+    "/{post_id}/comments",
+    response_model=schemas.Comment,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_comment(
+    post_id: int,
+    comment: schemas.CommentCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    # Create the comment via CRUD function (author eagerly loaded)
+    db_comment = await crud.create_post_comment(db, comment, post_id, current_user.id)
+    return db_comment
+
+
+# -------------------------------
+# 2) Get Comments for a Post
+# -------------------------------
+@post_actions_router.get("/{post_id}/comments", response_model=List[schemas.Comment])
+async def get_comments(
+    post_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    comments = await crud.get_comments_for_post(db, post_id)
+    return comments
+
+
+# -------------------------------
+# 3) Vote on a Post
+# -------------------------------
+@post_actions_router.post("/{post_id}/vote", response_model=schemas.Post)
+async def vote_on_post(
+    post_id: int,
+    vote: schemas.VoteCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    # Apply vote (updates post.votes)
+    updated_post = await crud.apply_vote(db, post_id, current_user.id, vote.vote_type)
+    if not updated_post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    # Reload post with all relationships eagerly loaded for response
+    post_detail = await crud.get_post_details(db, updated_post.id)
+    if not post_detail:
+        raise HTTPException(status_code=404, detail="Post not found after reload")
+
+    return post_detail

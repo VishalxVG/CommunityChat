@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import users, communities, posts
+from app.routers import feed, users, communities, posts
 
 app = FastAPI(
     title="Community Chat App",
@@ -17,6 +17,10 @@ app.include_router(communities.public_router)  # Public community routes
 # Post routes
 app.include_router(posts.router, tags=["posts"])
 app.include_router(posts.public_router)
+app.include_router(posts.post_actions_router)
+
+# Feed Routers
+app.include_router(feed.router, tags=["feed"])
 
 
 @app.get("/", tags=["root"])

@@ -2,6 +2,8 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
 
+from app.database.models import VoteType
+
 
 # -------------------------------
 # User Schemas
@@ -57,8 +59,19 @@ class Comment(CommentBase):
 
 
 # -------------------------------
+# Vote Schemas
+# -------------------------------
+
+
+class VoteCreate(BaseModel):
+    vote_type: VoteType
+
+
+# -------------------------------
 # Post Schemas
 # -------------------------------
+
+
 class PostBase(BaseModel):
     title: str
     content: Optional[str] = None
