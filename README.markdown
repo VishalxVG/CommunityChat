@@ -198,8 +198,6 @@ Contributions are welcome! Please feel free to open an issue or submit a pull re
 - [ ] Search functionality
 - [ ] Image and link sharing in posts
 
-## License
-This project is licensed under the MIT License. See the `LICENSE` file for details.
 
 ## Acknowledgements
 This project was built using the following open-source libraries and frameworks:
