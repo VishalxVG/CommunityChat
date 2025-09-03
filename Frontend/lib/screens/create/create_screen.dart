@@ -23,7 +23,7 @@ class CreateScreen extends ConsumerWidget {
                   final community = communities[index];
                   return ListTile(
                     leading: CircleAvatar(
-                      backgroundImage: NetworkImage(community.imageUrl),
+                      backgroundImage: NetworkImage(community.imageUrl!),
                     ),
                     title: Text('c/${community.name}'),
                     onTap: () {

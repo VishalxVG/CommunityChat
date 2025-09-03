@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fullstack_app/providers/post_providers.dart';
+import 'package:fullstack_app/providers/feed_providers.dart';
 import 'package:fullstack_app/widgets/post_card.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,7 +9,8 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final postsAsync = ref.watch(homeFeedPostsProvider);
+    // Watch the new feedProvider
+    final postsAsync = ref.watch(feedProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -22,25 +23,29 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
       body: postsAsync.when(
-        data: (posts) => RefreshIndicator(
-          onRefresh: () async {
-            ref.invalidate(homeFeedPostsProvider);
-          },
-          child: ListView.builder(
-            itemCount: posts.length,
-            itemBuilder: (context, index) {
-              final post = posts[index];
-              return PostCard(
-                post: post,
-                onTap: () => context.push('/post/${post.id}'),
-                onUpvote: () =>
-                    ref.read(homeFeedPostsProvider.notifier).upvote(post.id),
-                onDownvote: () =>
-                    ref.read(homeFeedPostsProvider.notifier).downvote(post.id),
-              );
+        data: (posts) {
+          if (posts.isEmpty) {
+            return const Center(
+                child: Text('Your feed is empty. Join some communities!'));
+          }
+          return RefreshIndicator(
+            onRefresh: () async {
+              // Invalidate the provider to refetch the data
+              ref.invalidate(feedProvider);
             },
-          ),
-        ),
+            child: ListView.builder(
+              itemCount: posts.length,
+              itemBuilder: (context, index) {
+                final post = posts[index];
+                return PostCard(
+                  post: post,
+                  onTap: () => context.push('/post/${post.id}'),
+                  // onUpvote and onDownvote logic will be added in the next step
+                );
+              },
+            ),
+          );
+        },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Error: $err')),
       ),

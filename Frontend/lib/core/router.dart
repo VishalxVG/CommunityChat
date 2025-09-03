@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fullstack_app/core/scaffold_nav_bar.dart';
+import 'package:fullstack_app/providers/auth_providers.dart';
 import 'package:fullstack_app/screens/community/community_details_screen.dart';
 import 'package:fullstack_app/screens/community/community_list_screen.dart';
 import 'package:fullstack_app/screens/community/create_community_screen.dart';
@@ -20,9 +21,25 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>(
   (ref) {
+    final authState = ref.watch(authProvider);
+
     return GoRouter(
       navigatorKey: _rootNavigatorKey,
-      initialLocation: '/', // Start at the login screen
+      initialLocation: '/login', // Start at the login screen
+      redirect: (context, state) {
+        final isAuthenticated = authState.isAuthenticated;
+        final isLoggingIn = state.matchedLocation == '/login' ||
+            state.matchedLocation == '/signup';
+
+        if (!isAuthenticated && !isLoggingIn) {
+          return '/login'; // Redirect to login if not authenticated and not on an auth page
+        }
+        if (isAuthenticated && isLoggingIn) {
+          return '/'; // Redirect to home if authenticated and on an auth page
+        }
+        return null; // No redirect needed
+      },
+
       routes: [
         // Routes that should NOT have the bottom navigation bar
         GoRoute(
@@ -62,24 +79,24 @@ final routerProvider = Provider<GoRouter>(
         ),
 
         // Other top-level routes that appear over the shell (no nav bar)
-        GoRoute(
-          path: '/community/:id',
-          builder: (context, state) {
-            final communityId = state.pathParameters['id']!;
-            return CommunityDetailsScreen(communityId: communityId);
-          },
-        ),
+        // GoRoute(
+        //   path: '/community/:id',
+        //   builder: (context, state) {
+        //     final communityId = state.pathParameters['id']!;
+        //     return CommunityDetailsScreen(communityId: communityId);
+        //   },
+        // ),
         GoRoute(
           path: '/create-community',
           builder: (context, state) => const CreateCommunityScreen(),
         ),
-        GoRoute(
-          path: '/community/:id/create-post',
-          builder: (context, state) {
-            final communityId = state.pathParameters['id']!;
-            return CreatePostScreen(communityId: communityId);
-          },
-        ),
+        // GoRoute(
+        //   path: '/community/:id/create-post',
+        //   builder: (context, state) {
+        //     final communityId = state.pathParameters['id']!;
+        //     return CreatePostScreen(communityId: communityId);
+        //   },
+        // ),
         GoRoute(
           path: '/post/:id',
           builder: (context, state) {

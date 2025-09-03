@@ -14,11 +14,11 @@ class CommentTile extends StatelessWidget {
         children: [
           Row(
             children: [
-              CircleAvatar(radius: 14, child: Text(comment.author[0])),
+              // CircleAvatar(radius: 14, child: Text(comment.author[0])),
               const SizedBox(width: 8),
-              Text(comment.author,
-                  style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(width: 8),
+              // Text(comment.author,
+              //     style: Theme.of(context).textTheme.titleSmall),
+              // const SizedBox(width: 8),
               Text('• 2h ago', style: Theme.of(context).textTheme.bodySmall),
             ],
           ),
@@ -35,7 +35,7 @@ class CommentTile extends StatelessWidget {
                 IconButton(
                     icon: const Icon(Icons.arrow_upward_outlined, size: 20),
                     onPressed: () {}),
-                Text(comment.upvotes.toString()),
+                // Text(comment.upvotes.toString()),
                 IconButton(
                     icon: const Icon(Icons.arrow_downward_outlined, size: 20),
                     onPressed: () {}),

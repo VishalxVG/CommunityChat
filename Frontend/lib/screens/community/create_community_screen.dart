@@ -45,12 +45,17 @@ class _CreateCommunityScreenState extends ConsumerState<CreateCommunityScreen> {
         child: Column(
           children: [
             CustomTextField(
-                controller: _nameController, hintText: 'Community Name'),
+              controller: _nameController,
+              hintText: 'Community Name',
+              isObscure: false,
+            ),
             const SizedBox(height: 16),
             CustomTextField(
-                controller: _descriptionController,
-                hintText: 'Description',
-                maxLines: 4),
+              controller: _descriptionController,
+              hintText: 'Description',
+              maxLines: 4,
+              isObscure: false,
+            ),
             const SizedBox(height: 24),
             CustomButton(
               text: 'Create Community',

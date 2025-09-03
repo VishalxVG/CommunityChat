@@ -1,4 +1,3 @@
-// Change to a ConsumerStatefulWidget to handle the TextEditingController
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fullstack_app/providers/post_providers.dart';
@@ -30,7 +29,7 @@ class _PostDetailsScreenState extends ConsumerState<PostDetailsScreen> {
         .addComment(text: _commentController.text.trim());
 
     _commentController.clear();
-    FocusScope.of(context).unfocus(); // Dismiss keyboard
+    FocusScope.of(context).unfocus();
   }
 
   @override
@@ -47,12 +46,11 @@ class _PostDetailsScreenState extends ConsumerState<PostDetailsScreen> {
               data: (post) => PostCard(
                 post: post,
                 onTap: () {},
-                onUpvote: () => ref
-                    .read(postDetailsProvider(widget.postId).notifier)
-                    .upvote(),
-                onDownvote: () => ref
-                    .read(postDetailsProvider(widget.postId).notifier)
-                    .downvote(),
+                // Use the new VoteController provider
+                onUpvote: () =>
+                    ref.read(voteProvider).vote(widget.postId, true),
+                onDownvote: () =>
+                    ref.read(voteProvider).vote(widget.postId, false),
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, s) => Center(child: Text(e.toString())),

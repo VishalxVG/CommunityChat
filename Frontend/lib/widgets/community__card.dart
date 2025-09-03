@@ -21,7 +21,7 @@ class CommunityCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundImage: NetworkImage(community.imageUrl),
+                backgroundImage: NetworkImage(community.imageUrl!),
                 onBackgroundImageError: (_, __) {}, // Handle image load error
               ),
               const SizedBox(width: 16),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:fullstack_app/models/post.dart';
 
 class PostCard extends StatelessWidget {
@@ -8,12 +7,13 @@ class PostCard extends StatelessWidget {
   final VoidCallback? onUpvote;
   final VoidCallback? onDownvote;
 
-  const PostCard(
-      {super.key,
-      required this.post,
-      required this.onTap,
-      this.onUpvote,
-      this.onDownvote});
+  const PostCard({
+    super.key,
+    required this.post,
+    required this.onTap,
+    this.onUpvote,
+    this.onDownvote,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,22 +27,25 @@ class PostCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('c/${post.communityName} • Posted by u/${post.author}',
+              // Use the nested community and author objects
+              Text(
+                  'c/${post.community.name} • Posted by u/${post.author.username}',
                   style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(height: 8),
               Text(post.title, style: Theme.of(context).textTheme.titleLarge),
-              if (post.text != null) ...[
+              if (post.text != null && post.text!.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(post.text!, maxLines: 3, overflow: TextOverflow.ellipsis),
               ],
-              if (post.imageUrl != null) ...[
-                const SizedBox(height: 12),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(post.imageUrl!,
-                      fit: BoxFit.cover, width: double.infinity, height: 150),
-                ),
-              ],
+              // This part for image is commented out as the backend schema does not have it yet
+              // if (post.imageUrl != null) ...[
+              //   const SizedBox(height: 12),
+              //   ClipRRect(
+              //     borderRadius: BorderRadius.circular(8),
+              //     child: Image.network(post.imageUrl!,
+              //         fit: BoxFit.cover, width: double.infinity, height: 150),
+              //   ),
+              // ],
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -65,7 +68,6 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildVoteButtons() {
-    // UI only, logic would be handled by a provider
     return Row(
       children: [
         IconButton(
