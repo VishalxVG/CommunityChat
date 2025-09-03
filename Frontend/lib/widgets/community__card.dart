@@ -4,9 +4,13 @@ import 'package:fullstack_app/models/community.dart';
 class CommunityCard extends StatelessWidget {
   final Community community;
   final VoidCallback onTap;
+  final bool isJoined; // Add this
 
   const CommunityCard(
-      {super.key, required this.community, required this.onTap});
+      {super.key,
+      required this.community,
+      required this.onTap,
+      required this.isJoined});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +25,7 @@ class CommunityCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundImage: NetworkImage(community.imageUrl!),
+                backgroundImage: NetworkImage(community.imageUrl),
                 onBackgroundImageError: (_, __) {}, // Handle image load error
               ),
               const SizedBox(width: 16),
@@ -37,7 +41,10 @@ class CommunityCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right),
+              if (isJoined)
+                Icon(Icons.check_circle, color: Colors.green.shade600),
+              const SizedBox(width: 8),
+              const Icon(Icons.chevron_right)
             ],
           ),
         ),

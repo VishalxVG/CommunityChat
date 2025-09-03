@@ -1,11 +1,11 @@
-// lib/screens/community/create_community_screen.dart
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; // Import Riverpod
-import 'package:fullstack_app/providers/community_providers.dart'; // Import providers
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fullstack_app/providers/community_providers.dart';
 import 'package:fullstack_app/widgets/custom_button.dart';
 import 'package:fullstack_app/widgets/custom_text_filed.dart';
+import 'package:go_router/go_router.dart';
 
-// Change to a ConsumerStatefulWidget
 class CreateCommunityScreen extends ConsumerStatefulWidget {
   const CreateCommunityScreen({super.key});
 
@@ -20,19 +20,29 @@ class _CreateCommunityScreenState extends ConsumerState<CreateCommunityScreen> {
   bool _isLoading = false;
 
   void _createCommunity() async {
-    if (_nameController.text.isEmpty) return; // Basic validation
+    if (_nameController.text.isEmpty) return;
 
     setState(() => _isLoading = true);
 
-    // Call the method on the notifier
-    await ref.read(communitiesProvider.notifier).createCommunity(
-          _nameController.text,
-          _descriptionController.text,
+    try {
+      await ref.read(communitiesProvider.notifier).createCommunity(
+            _nameController.text,
+            _descriptionController.text,
+          );
+      if (mounted) context.pop();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
         );
-
-    if (mounted) {
-      setState(() => _isLoading = false);
-      Navigator.of(context).pop();
+        if (kDebugMode) {
+          print(e.toString());
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 

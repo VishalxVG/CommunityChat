@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fullstack_app/models/comment.dart';
 import 'package:fullstack_app/models/post.dart';
+import 'package:fullstack_app/providers/community_providers.dart';
 
 import 'package:fullstack_app/providers/feed_providers.dart';
 
@@ -79,6 +80,33 @@ class VoteController {
     } catch (e) {
       // Handle potential errors, e.g., show a snackbar
       print("Error voting: $e");
+    }
+  }
+}
+
+final postActionsProvider = Provider((ref) => PostActionsController(ref));
+
+class PostActionsController {
+  final Ref _ref;
+  PostActionsController(this._ref);
+
+  Future<void> createPost({
+    required String communityId,
+    required String title,
+    required String? text,
+  }) async {
+    final apiService = _ref.read(apiServiceProvider);
+    try {
+      // Call the API to create the post
+      await apiService.createPost(communityId, title, text!);
+
+      // After creation, invalidate providers that show lists of posts
+      // so they refetch and display the new post.
+      _ref.invalidate(feedProvider);
+      _ref.invalidate(communityDetailsProvider(communityId));
+    } catch (e) {
+      // Let the UI handle the error
+      rethrow;
     }
   }
 }

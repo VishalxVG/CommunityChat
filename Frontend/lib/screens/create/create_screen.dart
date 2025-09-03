@@ -1,42 +1,48 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; // Import Riverpo
-import 'package:fullstack_app/providers/community_providers.dart'; // Import providers
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fullstack_app/models/community.dart'; // Import Community model
+import 'package:fullstack_app/providers/auth_providers.dart'; // Import auth provider
 import 'package:go_router/go_router.dart';
 
-// Change to a ConsumerWidget
 class CreateScreen extends ConsumerWidget {
   const CreateScreen({super.key});
 
   // Method to show the community picker bottom sheet
   void _showCommunityPicker(BuildContext context, WidgetRef ref) {
+    // Get the list of joined communities directly from the auth provider's state.
+    final List<Community> joinedCommunities =
+        ref.read(authProvider).user?.communities ?? [];
+
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        // Use a Consumer to fetch the communities list
-        return Consumer(
-          builder: (context, ref, child) {
-            final communitiesAsync = ref.watch(communitiesProvider);
-            return communitiesAsync.when(
-              data: (communities) => ListView.builder(
-                itemCount: communities.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final community = communities[index];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: NetworkImage(community.imageUrl!),
-                    ),
-                    title: Text('c/${community.name}'),
-                    onTap: () {
-                      // Dismiss the bottom sheet
-                      Navigator.of(context).pop();
-                      // Navigate to the create post screen for the selected community
-                      context.push('/community/${community.id}/create-post');
-                    },
-                  );
-                },
+        if (joinedCommunities.isEmpty) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                'You have not joined any communities yet. Join a community to post.',
+                textAlign: TextAlign.center,
               ),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => Center(child: Text('Error: $err')),
+            ),
+          );
+        }
+
+        return ListView.builder(
+          itemCount: joinedCommunities.length,
+          itemBuilder: (BuildContext context, int index) {
+            final community = joinedCommunities[index];
+            return ListTile(
+              leading: CircleAvatar(
+                backgroundImage: NetworkImage(community.imageUrl),
+              ),
+              title: Text('c/${community.name}'),
+              onTap: () {
+                // Dismiss the bottom sheet
+                Navigator.of(context).pop();
+                // Navigate to the create post screen for the selected community
+                context.push('/community/${community.id}/create-post');
+              },
             );
           },
         );

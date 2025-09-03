@@ -1,30 +1,39 @@
+import 'package:fullstack_app/models/post.dart';
+
 class Community {
   final String id;
   final String name;
-  // These fields might not be in all API responses, so make them nullable
   final String? description;
   final int? memberCount;
-  final String? imageUrl;
+  final String imageUrl; // We'll keep generating this on the client
+  final List<Post>? posts; // Add this to hold posts in the detail view
 
   Community({
     required this.id,
     required this.name,
     this.description,
     this.memberCount,
-    this.imageUrl,
+    required this.imageUrl,
+    this.posts,
   });
 
-  // Factory to create a Community from JSON
   factory Community.fromJson(Map<String, dynamic> json) {
+    // Parse the nested list of posts if it exists
+    final List<Post> posts = json['posts'] != null
+        ? (json['posts'] as List)
+            .map((postJson) => Post.fromJson(postJson))
+            .toList()
+        : [];
+
     return Community(
-      // FastAPI returns integer IDs, so we convert them to String
       id: json['id'].toString(),
       name: json['name'],
-      // Check for null values for optional fields
       description: json['description'],
+      // The backend provides member_count in the detail view
       memberCount: json['member_count'],
       imageUrl:
           'https://placehold.co/100x100/E0E0E0/000000?text=${json['name'][0]}',
+      posts: posts,
     );
   }
 }

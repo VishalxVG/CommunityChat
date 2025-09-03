@@ -98,6 +98,13 @@ class ApiService {
   }
 
   // -----------------------------------
+  // User Details Method
+  // -----------------------------------
+
+  Future<Map<String, dynamic>> getMe() async => await _handleRequest(
+      http.get(Uri.parse('$_baseUrl/api/users/me'), headers: _headers));
+
+  // -----------------------------------
   //  Home Feed Method
   // -----------------------------------
 
@@ -111,7 +118,7 @@ class ApiService {
   Future<List<dynamic>> getCommunitites() async =>
       await _handleRequest(http.get(Uri.parse('$_baseUrl/api/communities')));
 
-  Future<dynamic> getParticularCommunity(String commId) async =>
+  Future<dynamic> getCommunityDetails(String commId) async =>
       await _handleRequest(
           http.get(Uri.parse('$_baseUrl/api/communities/$commId')));
 
@@ -120,11 +127,11 @@ class ApiService {
             headers: _headers),
       );
 
-  Future<dynamic> createCommunity(String name, String desc) async =>
-      await _handleRequest(http.post(Uri.parse('$_baseUrl/api/communities'),
+  Future<dynamic> createCommunity(String name, String description) async =>
+      await _handleRequest(http.post(Uri.parse('$_baseUrl/api/communities/'),
           headers: _headers,
           body: json.encode(
-            {'name': name, 'description': desc},
+            {'name': name, 'description': description},
           )));
 
   // -----------------------------------
@@ -166,8 +173,13 @@ class ApiService {
       await _handleRequest(http.post(
         Uri.parse('$_baseUrl/api/posts/$postId/vote'),
         headers: _headers,
-        body: json.encode({'vote_type': isUpvote ? 'UPVOTE' : 'DOWNVOTE'}),
+        body: json.encode({
+          'vote_type': isUpvote ? 1 : -1,
+        }),
       ));
+
+  Future<List<dynamic>> getMyPosts() async => await _handleRequest(
+      http.get(Uri.parse('$_baseUrl/api/users/me/posts'), headers: _headers));
 
 //   Future<List<Post>> getHomeFeedPosts() async {
 //     await Future.delayed(const Duration(milliseconds: 600));

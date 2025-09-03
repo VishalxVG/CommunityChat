@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fullstack_app/providers/auth_providers.dart';
 import 'package:fullstack_app/providers/community_providers.dart';
 import 'package:fullstack_app/widgets/community__card.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +11,7 @@ class CommunityListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final communitiesAsync = ref.watch(communitiesProvider);
+    final joinedCommunityIds = ref.watch(authProvider).joinedCommunityIds;
 
     return Scaffold(
       appBar: AppBar(
@@ -27,9 +29,12 @@ class CommunityListScreen extends ConsumerWidget {
             itemCount: communities.length,
             itemBuilder: (context, index) {
               final community = communities[index];
+              final bool isJoined = joinedCommunityIds.contains(community.id);
+
               return CommunityCard(
                 community: community,
                 onTap: () => context.push('/community/${community.id}'),
+                isJoined: isJoined,
               );
             },
           ),
