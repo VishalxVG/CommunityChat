@@ -53,12 +53,15 @@ async def get_communities(db: AsyncSession, skip: int = 0, limit: int = 100):
 
 
 async def get_community(db: AsyncSession, community_id: int):
-    """Return a single community with posts + computed member_count."""
+    """Return a single community with posts + comments + members (with eager loading)."""
     result = await db.execute(
         select(models.Community)
         .options(
             selectinload(models.Community.posts).selectinload(models.Post.author),
             selectinload(models.Community.posts).selectinload(models.Post.community),
+            selectinload(models.Community.posts)
+            .selectinload(models.Post.comments)
+            .selectinload(models.Comment.author),
             selectinload(models.Community.members),
         )
         .filter(models.Community.id == community_id)

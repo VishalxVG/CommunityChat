@@ -123,8 +123,20 @@ class CommunityDetail(CommunityBase):
 
 
 # -------------------------------
+# User Details Schemas
+# -------------------------------
+
+
+class UserDetail(User):
+    communities: List[CommunitySimple] = []
+
+    model_config = {"from_attributes": True}
+
+
+# -------------------------------
 # Resolve forward refs
 # -------------------------------
 Post.model_rebuild()
 CommunitySimple.model_rebuild()
 CommunityDetail.model_rebuild()
+UserDetail.model_rebuild()

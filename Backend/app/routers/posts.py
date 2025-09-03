@@ -79,6 +79,18 @@ async def read_posts_for_community(
     return [Post.model_validate(post) for post in posts]
 
 
+@public_router.get("/posts/{post_id}")
+async def read_post_details(post_id: int, db: AsyncSession = Depends(get_db)):
+    post = await crud.get_post_details(db, post_id=post_id)
+
+    if not post:
+        raise HTTPException(
+            status_code=404,
+            detail="Post Not Found",
+        )
+    return post
+
+
 post_actions_router = APIRouter(prefix="/api/posts", tags=["posts-actions"])
 
 
