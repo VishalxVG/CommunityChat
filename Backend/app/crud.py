@@ -78,10 +78,17 @@ async def get_community(db: AsyncSession, community_id: int):
 async def create_community(
     db: AsyncSession, community: schemas.CommunityCreate, user_id: int
 ):
+    creator = await db.get(models.User, user_id)
+    if not creator:
+        return None
+
     db_community = models.Community(
         **community.model_dump(),
         created_by=user_id,
     )
+
+    db_community.members.append(creator)
+
     db.add(db_community)
     await db.commit()
     await db.refresh(db_community)
@@ -279,3 +286,20 @@ async def get_home_feed_for_user(
     posts = result.scalars().all()
     # Convert all posts to Pydantic models
     return [schemas.Post.model_validate(p) for p in posts]
+
+
+async def get_posts_by_user(db: AsyncSession, user_id: int):
+    """
+    Fetch all posts created by a specific user.
+    """
+    result = await db.execute(
+        select(models.Post)
+        .options(
+            selectinload(models.Post.author),
+            selectinload(models.Post.community),
+            selectinload(models.Post.comments).selectinload(models.Comment.author),
+        )
+        .filter(models.Post.user_id == user_id)
+        .order_by(models.Post.created_at.desc())
+    )
+    return result.scalars().all()

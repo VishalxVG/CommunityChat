@@ -25,12 +25,12 @@ async def create_community(
     db: AsyncSession = Depends(get_db),
     current_user: schemas.User = Depends(auth.get_current_user),
 ):
-    db_community = await crud.get_community_by_name(db, name=community.name)
-    if db_community:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Community name already registered",
-        )
+    # db_community = await crud.get_community_by_name(db, name=community.name)
+    # if db_community:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_400_BAD_REQUEST,
+    #         detail="Community name already registered",
+    #     )
 
     new_community = await crud.create_community(
         db=db, community=community, user_id=current_user.id

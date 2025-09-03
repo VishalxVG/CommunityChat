@@ -39,7 +39,7 @@ class User(Base):
 class Community(Base):
     __tablename__ = "communities"
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True)
+    name = Column(String, index=True)
     description = Column(String)
     created_by = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, default=datetime.utcnow)

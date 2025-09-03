@@ -1,6 +1,8 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.database import models
 from app.database.session import get_db
 from app import crud, schemas, auth
 
@@ -31,3 +33,32 @@ async def login(
         )
     access_token = auth.create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.get("/api/users/me", response_model=schemas.UserDetail)
+async def read_users_me(
+    db: AsyncSession = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    """
+    Fetch the current logged in user with their joined communities.
+    """
+    user_with_communities = await crud.get_user_by_username_with_communities(
+        db, username=current_user.username
+    )
+    if not user_with_communities:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return user_with_communities
+
+
+@router.get("/api/users/me/posts", response_model=List[schemas.Post])
+async def read_user_posts(
+    db: AsyncSession = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    """
+    Fetch all posts for the current logged in user.
+    """
+    posts = await crud.get_posts_by_user(db, user_id=current_user.id)
+    return posts
