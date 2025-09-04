@@ -21,8 +21,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the entire backend code
 COPY Backend/ .
 
-# Make the wait-for-it.sh script executable
-RUN chmod +x wait-for-it.sh
+COPY backend/start.sh .
+RUN chmod +x start.sh
 
-# Command to run
-CMD ["bash", "-c", "host=$(echo $DATABASE_URL | sed -E 's/^.*@([^:]+):[0-9]+.*$/\\1/'); port=$(echo $DATABASE_URL | sed -E 's/^.*:([0-9]+)\\/.*$/\\1/'); echo Waiting for $host:$port; ./wait-for-it.sh \"$host:$port\" -- sh -c 'alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000'"]
+CMD ["./start.sh"]
