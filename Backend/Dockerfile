@@ -24,6 +24,5 @@ COPY Backend/ .
 COPY Backend/start.sh .
 RUN chmod +x start.sh
 
-ENV PORT=8000
 
 CMD ["./start.sh"]
