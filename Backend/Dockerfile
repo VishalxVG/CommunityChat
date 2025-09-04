@@ -21,7 +21,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the entire backend code
 COPY Backend/ .
 
-COPY backend/start.sh .
+COPY Backend/start.sh .
 RUN chmod +x start.sh
 
 CMD ["./start.sh"]
