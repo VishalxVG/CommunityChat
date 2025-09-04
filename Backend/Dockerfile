@@ -1,6 +1,14 @@
 # Use an official Python runtime as a parent image
 FROM python:3.13-slim
 
+
+# Install system dependencies: netcat for wait-for-it.sh and PostgreSQL client (optional)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/*
+
+
+
 # Set working directory
 WORKDIR /app
 
