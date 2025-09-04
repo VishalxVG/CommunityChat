@@ -1,25 +1,20 @@
 # Use an official Python runtime as a parent image
 FROM python:3.13-slim
 
-# Install system dependencies (including netcat for wait-for-it)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    netcat-openbsd \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set the working directory in the container
+# Set working directory
 WORKDIR /app
 
-# Copy the requirements file into the container
-COPY requirements.txt .
+# Copy requirements file from backend folder
+COPY backend/requirements.txt .
 
-# Install Python dependencies
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the entire app code
-COPY . .
+# Copy the entire backend code
+COPY backend/ .
 
-# Make wait-for-it.sh executable
+# Make the wait-for-it.sh script executable
 RUN chmod +x wait-for-it.sh
 
-# Default command: use wait-for-it.sh to wait for DB before running Alembic and FastAPI
-CMD ["sh", "-c", "./wait-for-it.sh -- alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+# Command to run
+CMD ["./wait-for-it.sh", "--", "sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
