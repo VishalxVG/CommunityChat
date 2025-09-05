@@ -21,9 +21,11 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 # ✅ Override DB URL with environment variable if present
-DATABASE_URL = os.getenv("DATABASE_URL")
-if DATABASE_URL:
-    config.set_main_option("sqlalchemy.url", DATABASE_URL)
+DATABASE_URL = os.getenv("DATABASE_SYNC_URL") or config.get_main_option(
+    "sqlalchemy.url"
+)
+# if DATABASE_URL:
+#     config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 
 def run_migrations_offline() -> None:
